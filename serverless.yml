@@ -1,4 +1,17 @@
-service: aws-py # NOTE: update this with your service name
+service: token
+
+# use the stage from the cli if provided, otherwise fallback to the one in provider
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+  tableName: ${self:service}_${self:custom.stage}_tokens
+
+  # tokens expire after 30 days
+  tokenExpiry: 2592000
+
+  # configure read and write capacity
+  rcu: 25
+  wcu: 25
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -7,69 +20,74 @@ service: aws-py # NOTE: update this with your service name
 provider:
   name: aws
   runtime: python3.6
+  memorySize: 128
+  iamRoleStatements:
+    - Effect: Allow
+      Action: # Gives permission on the DynamoDB table
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:custom.region}:*:table/${self:custom.tableName}"
+  environment:
+    TABLE_NAME: ${self:custom.tableName}
+    TOKEN_EXPIRY: ${self:custom.tokenExpiry}
 
-# you can overwrite defaults here
   stage: dev
   region: eu-west-2
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.py
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.py
-#    - exclude-me-dir/**
+package:
+  exclude:
+    - .idea/**
+    - .npmignore
+    - package.json
+    - node_modules/**
+    - tests/**
+    - docs/**
+    - README.md
+    - tools/**
 
 functions:
-  hello:
-    handler: handler.hello
+  add:
+    handler: functions/add.handler
+    events:
+      - http:
+          path: /tokens/{id}
+          method: put
+  get:
+    handler: functions/get.handler
+    events:
+      - http:
+          path: /tokens/{id}
+          method: get
+  patch:
+    handler: functions/patch.handler
+    events:
+      - http:
+          path: /tokens/{id}
+          method: patch
+  delete:
+    handler: functions/delete.handler
+    events:
+      - http:
+          path: /tokens/{id}
+          method: delete
 
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-events:
-  - http:
-    path: /
-    method: get
-
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
-
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+resources:
+  Resources:
+    tokenTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: ${self:custom.rcu}
+          WriteCapacityUnits: ${self:custom.wcu}
