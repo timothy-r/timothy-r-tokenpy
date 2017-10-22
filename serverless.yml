@@ -1,4 +1,4 @@
-service: token
+service: tokenpy
 
 # use the stage from the cli if provided, otherwise fallback to the one in provider
 custom:
@@ -42,13 +42,9 @@ provider:
 package:
   exclude:
     - .idea/**
-    - .npmignore
-    - package.json
-    - node_modules/**
     - tests/**
     - docs/**
     - README.md
-    - tools/**
 
 functions:
   add:
