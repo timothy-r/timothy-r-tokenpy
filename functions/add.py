@@ -3,12 +3,12 @@ import boto3
 
 def handler(event, context):
 
-    id = event.pathParameters.id
+    id = event["pathParameters"]["id"]
 
     body = {
         "message": "add",
         "input": event,
-        "body": event.body,
+        "body": event["body"],
         "id": id
     }
 

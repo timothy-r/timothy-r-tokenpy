@@ -3,6 +3,8 @@ import json
 
 def handler(event, context):
 
+    id = event["pathParameters"]["id"]
+
     body = {
         "message": "delete",
         "input": event
