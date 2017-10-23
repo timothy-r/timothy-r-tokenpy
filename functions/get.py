@@ -12,11 +12,12 @@ def handler(event, context):
         TableName = os.environ['TABLE_NAME'],
         Key = {'id': {'S': id} }
     )
+    item = response.get("Item", None)
 
-    if (response["item"]):
+    if (item):
         response = {
             "statusCode": 200,
-            "body": json.dumps(response["item"])
+            "body": json.dumps(item)
         }
     else:
         response = {
