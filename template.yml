@@ -17,9 +17,46 @@ Resources:
       Role:
         Fn::ImportValue:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+      Policies: AmazonDynamoDBFullAccess
       Events:
         GetEvent:
           Type: Api
           Properties:
             Path: /{id}
             Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TokenTable
+  AddToken:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: functions/add.handler
+      Runtime: python3.6
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: put
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TokenTable
+
+  TokenTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
