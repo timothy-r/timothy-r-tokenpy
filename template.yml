@@ -45,6 +45,42 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TokenTable
+  UpdateToken:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: functions/patch.handler
+      Runtime: python3.6
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        PatchEvent:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: patch
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TokenTable
+  DeleteToken:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: functions/delete.handler
+      Runtime: python3.6
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        DeleteEvent:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: delete
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TokenTable
 
   TokenTable:
     Type: AWS::DynamoDB::Table
