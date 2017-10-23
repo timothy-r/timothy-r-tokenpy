@@ -10,7 +10,7 @@ def handler(event, context):
     table = dynamodb.Table(os.environ['TABLE_NAME'])
 
     response = table.delete_item(
-        Key = {'id': {'S': id} }
+        Key = {"id": id }
     )
 
     response = {
