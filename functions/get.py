@@ -1,6 +1,7 @@
 import json
 import os
 import boto3
+from dynamodb_json import json_util
 
 def handler(event, context):
 
@@ -15,9 +16,11 @@ def handler(event, context):
     item = response.get("Item", None)
 
     if (item):
+        """ convert ddb json data into a dict """
+        data = json_util.loads(item)
         response = {
             "statusCode": 200,
-            "body": json.dumps(item)
+            "body": json.dumps(data)
         }
     else:
         response = {
