@@ -17,7 +17,7 @@ def handler(event, context):
 
     if (item):
         """ convert ddb json data into a dict """
-        data = ast.literal_eval((json.dumps(item, cls=DecimalEncoder)))
+        data = ast.literal_eval(json.dumps(item))
         response = {
             "statusCode": 200,
             "body": json.dumps(data)
