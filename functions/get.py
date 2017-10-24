@@ -1,7 +1,7 @@
 import json
 import os
 import boto3
-from dynamodb_json import json_util
+import ast
 
 def handler(event, context):
 
@@ -17,7 +17,7 @@ def handler(event, context):
 
     if (item):
         """ convert ddb json data into a dict """
-        data = json_util.loads(item)
+        data = ast.literal_eval((json.dumps(item, cls=DecimalEncoder)))
         response = {
             "statusCode": 200,
             "body": json.dumps(data)
