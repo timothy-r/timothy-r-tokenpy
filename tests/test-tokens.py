@@ -1,6 +1,5 @@
 import unittest
 import uuid
-import urllib
 import os
 import requests
 import json
