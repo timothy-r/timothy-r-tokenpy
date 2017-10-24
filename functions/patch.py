@@ -4,16 +4,27 @@ import boto3
 
 def handler(event, context):
 
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(os.environ['TABLE_NAME'])
     id = event["pathParameters"]["id"]
 
-    body = {
-        "message": "patch",
-        "input": event
-    }
+    """
+     ensure body is json first
+    """
+    try:
+        data = json.loads(event["body"])
 
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(body)
-    }
+        table.update_item(
+            Key={"id": id},
+            AttributeUpdates = data
+        )
+
+        response = {
+            "statusCode": 200
+        }
+    except:
+        response = {
+            "statusCode": 400
+        }
 
     return response

@@ -55,6 +55,27 @@ class TokenTestCase(unittest.TestCase):
         r3 = requests.get(endpoint)
         self.assertMissing(r3)
 
+    def test_patch_token(self):
+        """ create a token """
+        data = self.createTokenData()
+        endpoint = self.createTokenEndpoint()
+
+        r1 = requests.put(endpoint, json.dumps(data))
+
+        self.assertSuccess(r1)
+
+        patchData = {"name": "more: " + str(random.random()), "more": "test field"}
+
+        r2 = requests.patch(endpoint, patchData)
+
+        self.assertSuccess(r2)
+
+        r3 = requests.get(endpoint)
+        responseData = r3.json()
+        self.assertEqual(data["date"], responseData["date"])
+        self.assertEqual(patchData["name"], responseData["name"])
+        self.assertEqual(patchData["more"], responseData["more"])
+
     """ 
         generate a new token endpoint 
     """
