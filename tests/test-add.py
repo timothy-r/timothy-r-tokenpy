@@ -9,9 +9,17 @@ from datetime import datetime
 
 """ 
     test adding tokens
-    https://jgrk6gidqd.execute-api.eu-west-2.amazonaws.com/Prod/{id}
 """
 class AddTokenTestCase(unittest.TestCase):
+
+    def test_get_missing_token_fails(self):
+        server = os.environ['TEST_SERVER']
+        tokenId = uuid.uuid4()
+        endpoint = "https://" + server + "/" + str(tokenId)
+
+        r = requests.get(endpoint)
+        self.assertEqual(404, r.status_code)
+
     def test_add_token(self):
 
         server = os.environ['TEST_SERVER']
@@ -33,7 +41,6 @@ class AddTokenTestCase(unittest.TestCase):
         responseData = r2.json()
         self.assertEqual(data["name"], responseData["name"])
         self.assertEqual(data["date"], responseData["date"])
-
 
 if __name__ == '__main__':
     unittest.main()
