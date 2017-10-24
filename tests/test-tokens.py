@@ -67,8 +67,10 @@ class TokenTestCase(unittest.TestCase):
         patchData = {"name": "more: " + str(random.random()), "more": "test field"}
 
         r2 = requests.patch(endpoint, patchData)
+        responseData = r2.json()
 
-        self.assertSuccess(r2)
+        """ self.assertSuccess(r2) """
+        self.assertEqual("error", responseData["message"])
 
         r3 = requests.get(endpoint)
         responseData = r3.json()

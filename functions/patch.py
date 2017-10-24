@@ -22,9 +22,10 @@ def handler(event, context):
         response = {
             "statusCode": 200
         }
-    except:
+    except Exception as e:
         response = {
-            "statusCode": 400
+            "statusCode": 400,
+            "message": str(e)
         }
 
     return response
